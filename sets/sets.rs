@@ -7,12 +7,12 @@ trait ToSet<T> {
 }
 
 // Implements ToSet trait for types that understand equality
-// and implement interator
-impl <T, I> ToSet<T> for I
-where T: Eq + Hash, I: Iterator<Item = T> {
+// and implement interator. Lifetime for cloned()
+impl <'a, T, I> ToSet<T> for I
+where T: 'a + Eq + Hash + Clone, I: Iterator<Item = &'a T> {
 
     fn to_set(self) -> HashSet<T> {
-        self.collect()
+        self.cloned().collect()          // cloned() to insure we don't run into lifetime issues
     }
 
 }
@@ -25,7 +25,7 @@ fn main() {
     let fruit = make_set("apple orange pear orange");
     let colors = make_set("brown purple orange yellow");
 
-    let intersect = fruit.intersection(&colors).cloned().to_set();
+    let intersect = fruit.intersection(&colors).to_set();
     
     println!("{:?}", intersect);    // Prints "orange"
 }
